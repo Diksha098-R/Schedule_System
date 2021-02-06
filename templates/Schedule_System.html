@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<!--suppress ALL -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="jquery-3.5.1.js"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.js"></script>
+    <link rel = "stylesheet" type = "text/css" href = "myCSS.css" />
+<!--    <script type="text/javascript" src="/scripts/14_Final_System.js"></script>-->
+ </head>
+<style>
+    html, body {
+        margin-top: 0%;
+        margin-left: 0%;
+        margin-right: 0%;
+        height: 100%;
+    }
+    .topNav {
+        overflow: hidden;
+        background-color: #80aaff;
+        text-align: center;
+        height: 5%;
+        padding-top: 1%;
+        font-size: 20px;
+        font-weight: bold;
+    }
+    .row {
+        display: flex;
+        margin-left:2%;
+        margin-right:2%;
+    }
+   .column1 {
+        float: center;
+        width: 40%;
+        height: 100%;
+        margin-top: 1%;
+        padding: 5px;
+    }
+   .column2 {
+        float: center;
+        width: 60%;
+        height: 100%;
+        margin-top: 1%;
+        padding: 5px;
+   }
+   table, td {
+        border: 1px solid black;
+        border-collapse: collapse;
+        margin-top: 0%;
+        width: 100%;
+   }
+   th {
+        width: 1%;
+        vertical-align: top;
+        text-align: center;
+   }
+    td {
+        width: 5%;
+        vertical-align: top;
+        text-align: left;
+    }
+    .monthly_time {
+        height: 70px;
+    }
+    .daily_time {
+        height: 50px;
+
+    }
+   table.center {
+        margin-left: auto;
+        margin-right: auto;
+   }
+   fieldset {
+        width: 90%;
+        border-top: dashed;
+        border: 1px dashed black;
+        border-collapse: collapse;
+        background-color: #f0f0f5;
+   }
+   legend {
+        font-weight: bold;
+   }
+   .header {
+        background-color: #80aaff;
+        height: 30px;
+   }
+   .fullHour {
+        background-color: #e6eeff;
+   }
+   .halfBottom {
+        background-color: #e6eeff;
+   }
+   .eventText {
+        font-style: italic;
+        font-size: 13px;
+        color: #0000ff;
+        text-decoration: underline;
+   }
+   .field_class {
+        margin-top: 5px;
+   }
+    .display_month {
+        height: 50px;
+        margin-top: 5px;
+        background-color: #e6eeff;
+        font-size: 20px;
+        text-align: center;
+        padding-top: 2%;
+    }
+
+</style>
+<script>
+
+function display(){
+
+    var curr_td = "td" + {{yy_mm}} + "-" + {{dd}};
+    curr_td = curr_td.replace(/^\s+|\s+$/g,"");
+    var curr_dd = {{yy_mm}} + "-" + {{dd}};
+    curr_dd = curr_dd.replace(/^\s+|\s+$/g,"");
+
+    var Date_time = {{Date_time|tojson|safe}}
+    var create_id = "";
+    var check_id = "";
+    var start = "";
+    var end = "";
+    var prev_date, curr_date = "";
+    var display_str = "";
+    var display_hover = "";
+    var flag = 0;
+
+    var det = ["Personal Meeting", "On site Meeting", "Customer Meeting", "Team Meeting"];
+    var detail_obj = document.getElementById("meeting_detail");
+    detail_obj.length = 1;
+    for(var i=0; i<det.length; i++){
+        detail_obj.options[detail_obj.options.length] = new Option(det[i], det[i]);
+    }
+
+    for (var i=0; i<Date_time["Meetings"].length; i++)
+    {
+        create_id = Date_time["Meetings"][i]["Date"].split('-');
+        create_id[2] = Number(create_id[2]).toString();
+        curr_date = create_id[0]+create_id[1]+"-"+create_id[2];
+
+        if(i == 0){
+            prev_date = curr_date;
+            display_str = Date_time["Meetings"][i]["Start_Time"] + "-" + Date_time["Meetings"][i]["End_Time"];
+            display_hover = Date_time["Meetings"][i]["Start_Time"] + "-" + Date_time["Meetings"][i]["End_Time"] + " : " + Date_time["Meetings"][i]["Details"];
+        }
+        else{
+            if(prev_date == curr_date){
+                display_str = display_str + "<br>" + Date_time["Meetings"][i]["Start_Time"] + "-" + Date_time["Meetings"][i]["End_Time"];
+                display_hover = display_hover + "\n\n" + Date_time["Meetings"][i]["Start_Time"] + "-" + Date_time["Meetings"][i]["End_Time"] + " : " + Date_time["Meetings"][i]["Details"];
+            }
+            else{
+                document.getElementById(prev_date).classList.add("eventText");
+                document.getElementById(prev_date).innerHTML = display_str;
+                document.getElementById(prev_date).title = display_hover;
+                prev_date = curr_date;
+                display_str = Date_time["Meetings"][i]["Start_Time"] + "-" + Date_time["Meetings"][i]["End_Time"];
+                display_hover = Date_time["Meetings"][i]["Start_Time"] + "-" + Date_time["Meetings"][i]["End_Time"] + " : " + Date_time["Meetings"][i]["Details"];
+            }
+        }
+        document.getElementById("month").style.visibility = "visible";
+        document.getElementById(prev_date).classList.add("eventText");
+        document.getElementById(curr_date).innerHTML = display_str;
+        document.getElementById(curr_date).title = display_hover;
+
+    }
+
+    document.getElementById(curr_td).style.backgroundColor = "#e6eeff";
+
+    if({{error}} == "1"){
+        alert("Sorrryy!\n You have another meeting at that time :((((((");
+    }
+    else if({{error}} == "2"){
+        alert("Sorrryy!\n Meeting room is not available at that time :((((((");
+    }
+    else if({{error}} == "3"){
+        alert("Sorrryy!\n All participants are not available at that time :((((((");
+    }
+    else if({{error}} == "4"){
+        alert("Ooppss!\n The Start Time is greater than End Time :((((((");
+    }
+    else if({{error}} == "5"){
+        alert("Ooppss!\n You cannot book previous date meetings :((((((");
+    }
+    document.getElementById("td202102-3").title = "From Javascript...";
+
+}
+
+function checkBox(){
+    var x = document.getElementById("check_meeting_rooms").checked;
+
+    if(x == true){
+        document.getElementById("create_rooms").style.visibility = "visible";
+        var li = ["M100", "M101", "M102", "M103"];
+        var room_obj = document.getElementById("meeting_room");
+        room_obj.length = 1;
+        for(var i=0; i<li.length; i++){
+            room_obj.options[room_obj.options.length] = new Option(li[i], li[i]);
+        }
+    }
+    else{
+        document.getElementById("create_rooms").style.visibility = "hidden";
+    }
+}
+
+function add_persons(){
+    var x = document.getElementById("add_participant_checkbox").checked
+    if(x == true){
+        document.getElementById("add_participants_para").style.visibility = "visible";
+        var li = ["Pooja", "Sayali", "Shivansh", "Aboli"];
+        var people_obj = document.getElementById("add_participant_select");
+        people_obj.length = 1;
+        for(var i=0; i<li.length; i++){
+            people_obj.options[people_obj.options.length] = new Option(li[i], li[i]);
+        }
+    }
+    else{
+        document.getElementById("add_participants_para").style.visibility = "hidden";
+    }
+}
+
+function add_participant(){
+    var disp_participant = document.getElementById("add_participant_textbox");
+    var disp_part_value = document.getElementById("add_participant_textbox").value;
+    var get_select_value = document.getElementById("add_participant_select").value;
+    var disp_participant1 = "";
+    var flag = 0;
+
+    if(disp_part_value == "No participants added" && get_select_value == ""){
+        disp_participant.value = disp_part_value;
+    }
+    else if(disp_part_value == "No participants added" || get_select_value == ""){
+        disp_part_value = get_select_value;
+        disp_participant.value = disp_part_value;
+    }
+    else{
+        disp_participant1 = disp_part_value.split(',');
+        for (var i=0; i < disp_participant1.length; i++)
+        {
+            if (disp_participant1[i] == get_select_value)
+            {   flag = 1;
+            }
+        }
+        if (flag == 0){
+            disp_part_value += "," + get_select_value;
+            disp_participant.value = disp_part_value;
+        }
+        flag = 0;
+    }
+}
+
+function validate(){
+    var value = true;
+
+    if (document.getElementById("form_date").value == "")
+    {   value = false;
+        alert("Please enter Date!");
+    }
+    else if (document.getElementById("form_start_time").value == "")
+    {   value = false;
+        alert("Please enter Start Time!");
+    }
+    else if (document.getElementById("form_end_time").value == "")
+    {   value = false;
+        alert("Please enter End Time!");
+    }
+    else if (document.getElementById("check_meeting_rooms").checked && document.getElementById("meeting_room").value == "")
+    {   value = false;
+        alert("Please enter Meeting Room!");
+    }
+    else if (document.getElementById("add_participant_checkbox").checked && (document.getElementById("add_participant_textbox").value == "No participants added" && document.getElementById("add_participant_select").value == ""))
+    {   value = false;
+        alert("Please add Participants!");
+    }
+
+    return value;
+}
+
+</script>
+<body onload="display();" onsubmit="return validate();">
+<div class="topNav">Meeting Schedule System</div>
+<div class="row">
+    <div class="column1" id="disp_month">
+    <form name="form" method="post">
+        <fieldset> <legend>Details</legend>
+            <label class="field_class">Date : </label><input class="field_class" type="date" id="form_date" name="date"/> <br>
+            <label class="field_class">Start Time : </label><input class="field_class" type="time" id="form_start_time" name="start_time"/> &nbsp
+            <label class="field_class">End Time : </label><input class="field_class" type="time" id="form_end_time" name="end_time"/> <br>
+            Meeting Details : <select class="field_class" name="meeting_details" id="meeting_detail">
+            <option value="" selected="selected">Select Details</option>
+            </select>
+        </fieldset>
+        <fieldset>
+            <legend>Meeting Room</legend>
+            <input class="field_class" type="checkbox" name="meeting_rooms_checkbox" id="check_meeting_rooms" onclick="checkBox()"><label>Check Meeting Rooms</label>
+            <p id="create_rooms" style="visibility: hidden;">Meeting Rooms: <select class="field_class" name="meeting_rooms" id="meeting_room">
+            <option value="" selected="selected">Select meeting room</option>
+            </select></p>
+        </fieldset>
+        <fieldset> <legend>Participants</legend>
+            <input class="field_class" type="checkbox" name="meeting_people" id="add_participant_checkbox" onclick="add_persons()"><label>Add participants</label>
+            <p id="add_participants_para" style="visibility: hidden;">Name: <select class="field_class" name="add_participants" id="add_participant_select">
+            <option value="" selected="selected">Select Participants</option> </select>
+            &nbsp <input class="field_class" type="submit" id="add_participant_btn" value="Add Participant" formaction="javascript:add_participant();">
+            &nbsp <input class="field_class" type="text" id="add_participant_textbox" name="participant_textbox" value="No participants added"></p>
+        </fieldset>
+        <input class="field_class" type="submit" id="Book_Meeting" value="Book Meeting" style="float: center;" formaction="http://localhost:5000/book_meeting"></p></p>
+    </form>
+    </div>
+
+    <div class="column2">
+        <div class="display_month" id="month">{{month}} {{yy}}</div>
+        <table>
+            <tr class="header">
+                <th>Mo</th><th>Tu</th><th>We</th><th>Th</th><th>Fr</th><th>Sa</th><th>Su</th>
+            </tr>
+            <tr class="monthly_time">
+                {% for i in range(dayNumber) %}
+                    <td></td>
+                {% endfor %}
+                {% for i in range(7 - dayNumber) %}
+                    <td id="td{{yy_mm}}-{{i+1}}">{{i+1}}<br><span id="{{yy_mm}}-{{i+1}}"></span></td>
+                {% endfor %}
+            </tr>
+            <tr class="monthly_time">
+                {% for i in range(7-dayNumber, 14-dayNumber) %}
+                    <td id="td{{yy_mm}}-{{i+1}}" >{{i+1}}<br><span id="{{yy_mm}}-{{i+1}}"></span></td>
+                {% endfor %}
+            </tr>
+            <tr class="monthly_time">
+                {% for i in range(14-dayNumber, 21-dayNumber) %}
+                    <td id="td{{yy_mm}}-{{i+1}}">{{i+1}}<br><span id="{{yy_mm}}-{{i+1}}"></span></td>
+                {% endfor %}
+            </tr>
+            <tr class="monthly_time">
+                {% for i in range(21-dayNumber, 28-dayNumber) %}
+                    <td id="td{{yy_mm}}-{{i+1}}">{{i+1}}<br><span id="{{yy_mm}}-{{i+1}}"></span></td>
+                {% endfor %}
+            </tr>
+            {% if (last_date - (35-dayNumber) < 0) %}
+                <tr class="monthly_time">
+                    {% for i in range(28-dayNumber, last_date) %}
+                        <td id="td{{yy_mm}}-{{i+1}}">{{i+1}}<br><span id="{{yy_mm}}-{{i+1}}"></span></td>
+                    {% endfor %}
+                </tr>
+            {% else %}
+                <tr class="monthly_time">
+                    {% for i in range(28-dayNumber, 35-dayNumber) %}
+                        <td id="td{{yy_mm}}-{{i+1}}">{{i+1}}<br><span id="{{yy_mm}}-{{i+1}}"></span></td>
+                    {% endfor %}
+                </tr>
+                <tr class="monthly_time">
+                    {% for i in range(35-dayNumber, last_date) %}
+                        <td id="td{{yy_mm}}-{{i+1}}">{{i+1}}<br><span id="{{yy_mm}}-{{i+1}}"></span></td>
+                    {% endfor %}
+                </tr>
+            {% endif %}
+        </table>
+    </div>
+</div>
+</div>
+
+</body>
+</html>
