@@ -10,13 +10,13 @@ app = Flask(__name__)
 client = MongoClient('localhost', 27017)
 
 # Getting the database instance
-db = client['mydb1']
+db = client['Schedule_System']
 print("Database created........" + str(db))
 
 # Creating a collection
 collection = db['Persons']
 print("Collection created........" + str(collection))
-collection_Meetings = db['Meetings1']
+collection_Meetings = db['Meeting_Rooms']
 print("Meetings Collection created........" + str(collection_Meetings))
 
 # global variables
